@@ -18,6 +18,7 @@ export interface RepoOptionType extends PrivateOption {
     ref?: string;
     relativePath?: string;
     githubLink?: string;
+    proxy?: string;
 }
 export interface RepoTreeNode {
     path: string;

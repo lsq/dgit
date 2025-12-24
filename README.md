@@ -33,12 +33,12 @@
 ## 安装
 + 全局安装
 ```bash
-$ npm install @dking/dgit -g
+$ npm install @bratel/dgit -g
 ```
 + 本地安装
 ```bash
-$ npm install @dking/dgit --save
-$ yarn add @dking/dgit
+$ npm install @bratel/dgit --save
+$ yarn add @bratel/dgit
 ```
 
 ## 使用
@@ -49,7 +49,7 @@ $ dgit d https://github.com/JohnApache/hasaki-cli/tree/master/src -d ./abc
 
 + 本地安装，作为模块使用
 ```js
-import dgit from '@dking/dgit';
+import dgit from '@bratel/dgit';
 
 (async () => {
     await dgit(
@@ -81,11 +81,14 @@ import dgit from '@dking/dgit';
         * -t --token, <token>             git token 是另一种登录方式的可配置参数，用于下载私有仓库.
         * -e --exclude, <relativePath,...,relativePath>  指定当前下载目录需要排除的文件或目录路径集合.
         * -i --include, <relativePath,...,relativePath>  指定当前排除的文件路径集合中需要重新包含的文件或目录集合.
+        * --log                           打印调试信息.
+        * --log-prefix <log_prefix>        在打印信息前添加固定字符串.
+        * --proxy <url>                   使用代理，比如https://gh-proxy.com
         * -h, --help                      帮助文档
 
 + 局部安装，作为模块使用时，可配置参数
     ```js
-    import dgit from '@dking/dgit';
+    import dgit from '@bratel/dgit';
     import path from 'path';
     const repoOption = {
         owner: 'JohnApache'; // git 仓库作者名

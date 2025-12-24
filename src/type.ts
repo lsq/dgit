@@ -21,6 +21,7 @@ export interface RepoOptionType extends PrivateOption {
     ref?: string; // branch,  commit hash, tag.
     relativePath?: string; // download relative path
     githubLink?: string;
+    proxy?: string;
 }
 
 export interface RepoTreeNode {

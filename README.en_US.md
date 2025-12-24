@@ -33,12 +33,12 @@
 ## Install
 + Global Installation
 ```bash
-$ npm install @dking/dgit -g
+$ npm install @bratel/dgit -g
 ```
 + Local Installation
 ```bash
-$ npm install @dking/dgit --save
-$ yarn add @dking/dgit
+$ npm install @bratel/dgit --save
+$ yarn add @bratel/dgit
 ```
 
 ## Usage
@@ -49,7 +49,7 @@ $ dgit d https://github.com/JohnApache/hasaki-cli/tree/master/src -d ./abc
 
 + Local installation as module
 ```js
-import dgit from '@dking/dgit';
+import dgit from '@bratel/dgit';
 
 (async () => {
     await dgit(
@@ -86,7 +86,7 @@ import dgit from '@dking/dgit';
 
 + Local installation, configurable parameters when used as a module   
     ```js
-    import dgit from '@dking/dgit';
+    import dgit from '@bratel/dgit';
     import path from 'path';
     const repoOption = {
         owner: 'JohnApache'; // Git repository author name

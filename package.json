@@ -1,5 +1,5 @@
 {
-  "name": "@dking/dgit",
+  "name": "@bratel/dgit",
   "version": "0.0.12",
   "description": "@dking/hasaki-cli init application",
   "bin": {

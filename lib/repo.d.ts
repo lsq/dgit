@@ -1,4 +1,4 @@
-declare const repoUtils: (owner: string, repoName: string, ref: string) => {
+declare const repoUtils: (owner: string, repoName: string, ref: string, proxy: string) => {
     getRepoTreeUrl: () => string;
     getDownloadUrl: (path: string) => string;
 };

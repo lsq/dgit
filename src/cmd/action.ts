@@ -34,6 +34,9 @@ const DownloadAction = async (
     const {
         parallelLimit = '', username, token,
     } = cmd;
+    const {
+        proxy = '',
+    } = cmd;
 
     if (githubLink && isHttpsLink(githubLink)) {
         const parseResult = ParseGithubHttpsLink(githubLink);
@@ -78,6 +81,7 @@ const DownloadAction = async (
                 username,
                 password,
                 token,
+                proxy,
             },
             dest,
             {

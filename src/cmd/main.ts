@@ -49,6 +49,7 @@ program
     )
     .option('--log', 'output dgit internal log details.')
     .option('--log-prefix, <log>', 'dgit internal log prefix.')
+    .option('--proxy, <proxyHttp>', 'dgit proxy download url.')
     .alias('d')
     .description('download the file with the specified path of the remote repo.')
     .action(DownloadAction);

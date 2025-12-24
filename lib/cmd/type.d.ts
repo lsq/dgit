@@ -16,6 +16,7 @@ export interface CommandInfo {
     include?: string;
     log?: boolean;
     logPrefix?: string;
+    proxy?: string;
 }
 export interface DownloadPromptInfo {
     dest: string;

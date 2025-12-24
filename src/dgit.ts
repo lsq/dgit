@@ -15,7 +15,7 @@ import {
     ParseGithubHttpsLink, isHttpsLink, MakeDirs,
 } from './cmd/utils';
 
-const UserAgent = '@dking/dgit';
+const UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36';
 const DEFAULT_PARALLEL_LIMIT = 10;
 const MAX_PARALLEL_LIMIT = 100;
 const JSON_STRINGIFY_PADDING = 2;
@@ -27,7 +27,7 @@ const dgit = async (
     hooks?: DgitLifeCycle & DgitLoadGitTree,
 ): Promise<void> => {
     const {
-        username, password, token, githubLink,
+        username, password, token, githubLink, proxy = ''
     } = repoOption;
 
     let {
@@ -77,7 +77,7 @@ const dgit = async (
         onErrorReject = reject;
     });
 
-    const { getRepoTreeUrl, getDownloadUrl } = repo(owner, repoName, ref);
+    const { getRepoTreeUrl, getDownloadUrl } = repo(owner, repoName, ref, proxy);
     const url = getRepoTreeUrl();
 
     const headers = {
