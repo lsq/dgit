@@ -1,6 +1,6 @@
 {
   "name": "@bratel/dgit",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "@dking/hasaki-cli init application",
   "bin": {
     "dgit": "./bin/cmd.js"
@@ -11,7 +11,14 @@
     "dgit",
     "github download tool"
   ],
-  "author": "JohnApache",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lsq/dgit"
+  },
+   "publishConfig": {
+    "access": "public"
+  },
+ "author": "JohnApache",
   "license": "MIT",
   "scripts": {
     "build:ts": "tsc --build",
