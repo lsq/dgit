@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   build:
-    if: startsWith(github.ref_name, 'v')
+    # if: startsWith(github.ref_name, 'v')
     permissions:
       pull-requests: write # for writing comments
       issues: write # for writing comments
@@ -37,20 +37,20 @@ jobs:
           npm run test:mocha
         env:
           CI: true
-      - name: check auth
-        run: |
-          cat .npmrc || echo "pass"
-          cat ~/.npmrc || echo "pass"
-          echo "=== npm config list ==="
-          npm config list
-          cat /home/runner/work/_temp/.npmrc || echo "pass"
-          cp /home/runner/work/_temp/.npmrc x-npmrc || echo "pass"
-          # ls -la "$(npm config get prefix)/etc/npmrc" 2>/dev/null || echo "Not found"
-      - name: Upload npmrc
-        uses: actions/upload-artifact@v4
-        with:
-          name: 'npmrc'
-          path: 'x-npmrc'
+      # - name: check auth
+      #   run: |
+      #     cat .npmrc || echo "pass"
+      #     cat ~/.npmrc || echo "pass"
+      #     echo "=== npm config list ==="
+      #     npm config list
+      #     cat /home/runner/work/_temp/.npmrc || echo "pass"
+      #     cp /home/runner/work/_temp/.npmrc x-npmrc || echo "pass"
+      #     # ls -la "$(npm config get prefix)/etc/npmrc" 2>/dev/null || echo "Not found"
+      # - name: Upload npmrc
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: 'npmrc'
+      #     path: 'x-npmrc'
       - name: Publish
         if: startsWith(github.ref_name, 'v')
         run: |
