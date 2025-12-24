@@ -40,7 +40,7 @@
     }
   },
   "devDependencies": {
-    "@dking/eslint-config-typescript": "^0.0.4",
+    "@dking/eslint-config-typescript": "^0.0.5",
     "@types/chai": "^4.2.0",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.7.5",
