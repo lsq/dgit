@@ -1,2 +1,2 @@
-import { DgitGlobalOption } from './type';
-export declare const createLogger: (option?: DgitGlobalOption | undefined) => (...message: any[]) => void;
+import type { DgitGlobalOption } from './type';
+export declare function createLogger(option?: DgitGlobalOption): (...message: any[]) => void;

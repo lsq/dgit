@@ -9,8 +9,8 @@ jobs:
       pull-requests: write # for writing comments
       issues: write # for writing comments
       contents: write # for creating a release
-      id-token: write  # Required for OIDC
- 
+      id-token: write # Required for OIDC
+
     runs-on: ubuntu-latest
 
     strategy:

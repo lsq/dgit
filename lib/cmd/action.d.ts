@@ -1,4 +1,4 @@
-import { Command } from 'commander';
-import { CommandInfo } from './type';
-declare const DownloadAction: (githubLink: string | undefined, cmd: Command & CommandInfo) => Promise<any>;
+import type { Command } from 'commander';
+import type { CommandInfo } from './type';
+declare function DownloadAction(githubLink: string | undefined, cmd: Command & CommandInfo): Promise<any>;
 export default DownloadAction;

@@ -1,5 +1,5 @@
-# Dgit 
-<!-- 
+# Dgit
+<!--
 [![NPM version][npm-image]][npm-url]
 [![build status][travis-image]][travis-url]
 [![Test coverage][codecov-image]][codecov-url]
@@ -52,17 +52,17 @@ $ dgit d https://github.com/JohnApache/hasaki-cli/tree/master/src -d ./abc
 import dgit from '@bratel/dgit';
 
 (async () => {
-    await dgit(
-        {
-            owner: 'JohnApache',
-            repoName: 'hasaki-cli',
-            ref: 'master',
-            relativePath: 'src',
-        },
-        './aaa',
-    );
-    console.log('download succeed');
-})()
+  await dgit(
+    {
+      owner: 'JohnApache',
+      repoName: 'hasaki-cli',
+      ref: 'master',
+      relativePath: 'src',
+    },
+    './aaa',
+  );
+  console.log('download succeed');
+})();
 ```
 
 ## 配置
@@ -91,13 +91,13 @@ import dgit from '@bratel/dgit';
     import dgit from '@bratel/dgit';
     import path from 'path';
     const repoOption = {
-        owner: 'JohnApache'; // git 仓库作者名
-        repoName: 'hasaki-cli'; // git 仓库名称
-        ref: 'master'; // git 仓库指定 branch，commit 或 tag，
-        relativePath: '.'; // 指定git所需要下载的目录或者文件相对位置
-        username: ''; // 指定git用户名, 在下载私有仓库时需要的配置参数.
-        password: ''; // 指定git密码, 同username 一起使用，在下载私有仓库时需要的配置参数.
-        token: ''; // git token 是另一种登录方式的可配置参数，用于下载私有仓库.
+        owner: 'JohnApache', // git 仓库作者名
+        repoName: 'hasaki-cli', // git 仓库名称
+        ref: 'master', // git 仓库指定 branch，commit 或 tag，
+        relativePath: '.', // 指定git所需要下载的目录或者文件相对位置
+        username: '', // 指定git用户名, 在下载私有仓库时需要的配置参数.
+        password: '', // 指定git密码, 同username 一起使用，在下载私有仓库时需要的配置参数.
+        token: '', // git token 是另一种登录方式的可配置参数，用于下载私有仓库.
     }
 
     const githubLinkOption = {
@@ -122,7 +122,6 @@ import dgit from '@bratel/dgit';
         onResolved: (status) => void,
     }
 
-
     (async () => {
         await dgit(
             repoOption,
@@ -140,10 +139,10 @@ import dgit from '@bratel/dgit';
         );
         console.log('githubLinkOption download succeed.');
     })()
-    ```    
+    ```
 ## 注意
 1. 在下载私有仓库的时候需要提供下载权限，此时需要传入额外的参数，方式有两种
-+ Basic authentication 
++ Basic authentication
 
     通过传入 用户名 和 密码，来提供下载权限, 当传入用户名，可以不显式提供密码，在没有提供密码时，会单独出现密码提示
 
@@ -160,9 +159,9 @@ import dgit from '@bratel/dgit';
     $ dgit d https://github.com/JohnApache/hasaki-cli/tree/master/src -d ./abc -t OAUTH-TOKEN
     ```
 
-2. 下载资源失败 `raw.githubusercontent.com` 连接失败  
-    由于国内访问 `raw.githubusercontent.com` 地址，除了墙以外，大多数还有一种情况就是域名 `dns污染` ，需要查询正确的 ip 地址 
-    - **【查询方案1】**：打开 `https://www.ipaddress.com/` 输入访问不了的域名，查询之后可以获得正确的 IP 地址， 
+2. 下载资源失败 `raw.githubusercontent.com` 连接失败
+    由于国内访问 `raw.githubusercontent.com` 地址，除了墙以外，大多数还有一种情况就是域名 `dns污染` ，需要查询正确的 ip 地址
+    - **【查询方案1】**：打开 `https://www.ipaddress.com/` 输入访问不了的域名，查询之后可以获得正确的 IP 地址，
 
     > Tips: 可能该 ip 因为墙的问题还是访问不了，可以使用下面的方案
     - **【查询方案2】**：打开 `https://site.ip138.com/raw.githubusercontent.com/` ，可以查询到对应国内中国香港的 IP 地址

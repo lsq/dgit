@@ -52,19 +52,18 @@ $ dgit d https://github.com/JohnApache/hasaki-cli/tree/master/src -d ./abc
 import dgit from '@bratel/dgit';
 
 (async () => {
-    await dgit(
-        {
-            owner: 'JohnApache',
-            repoName: 'hasaki-cli',
-            ref: 'master',
-            relativePath: 'src',
-        },
-        './aaa',
-    );
-    console.log('download succeed');
-})()
+  await dgit(
+    {
+      owner: 'JohnApache',
+      repoName: 'hasaki-cli',
+      ref: 'master',
+      relativePath: 'src',
+    },
+    './aaa',
+  );
+  console.log('download succeed');
+})();
 ```
-
 
 ## Configuration
 + Global installation, used as command line, configurable parameters
@@ -84,18 +83,18 @@ import dgit from '@bratel/dgit';
         * -i --include, <relativePath,...,relativePath>  Specifies the collection of files or directories that need to be included again in the currently excluded file path collection.
         * -h, --help                      Output usage information
 
-+ Local installation, configurable parameters when used as a module   
++ Local installation, configurable parameters when used as a module
     ```js
     import dgit from '@bratel/dgit';
     import path from 'path';
     const repoOption = {
-        owner: 'JohnApache'; // Git repository author name
-        repoName: 'hasaki-cli'; // Git repo name
+        owner: 'JohnApache', // Git repository author name
+        repoName: 'hasaki-cli', // Git repo name
         ref: 'master'; // Git repo branch，commit hash or tagname，
-        relativePath: '.'; // Specifies the relative location of the directory or file that git needs to download
-        username: ''; // Specify git account name.
-        password: ''; // Specify the git account password.
-        token: ''; // Git token is another configurable parameter of login mode.
+        relativePath: '.', // Specifies the relative location of the directory or file that git needs to download
+        username: '', // Specify git account name.
+        password: '', // Specify the git account password.
+        token: '', // Git token is another configurable parameter of login mode.
     }
 
     const githubLinkOption = {
@@ -121,7 +120,6 @@ import dgit from '@bratel/dgit';
         onResolved: (status) => void,
     }
 
-
     (async () => {
         await dgit(
             repoOption,
@@ -139,11 +137,11 @@ import dgit from '@bratel/dgit';
         );
         console.log('githubLinkOption download succeed.');
     })()
-    ``` 
+    ```
 
 ## TIPS
 When downloading the private repo, you need to provide download permission. At this time, you need to pass in additional parameters in two ways
-+ Basic authentication 
++ Basic authentication
 
     Download permission is provided by passing in user name and password. When passing in user name, password can not be provided explicitly. When password is not provided, password input option will appear password prompt;
     ```bash

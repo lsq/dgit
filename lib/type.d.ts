@@ -1,4 +1,4 @@
-export declare type GithubRelativePath = string;
+export type GithubRelativePath = string;
 export interface DgitGlobalOption {
     maxRetryCount?: number;
     parallelLimit?: number;
