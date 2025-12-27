@@ -86,34 +86,29 @@ async function dgit(repoOption: RepoOptionType, dPath: string, dgitOptions?: Dgi
   const { getRepoTreeUrl, getDownloadUrl } = repo(owner, repoName, ref, proxy);
   const url = getRepoTreeUrl();
 
-  const headers = {
-    'User-Agent': UserAgent,
-    'Authorization': token ? `token ${token}` : undefined,
-  };
-
-  const auth = username && password
-    ? {
-        user: username,
-        pass: password,
-        sendImmediately: true,
-      }
-    : undefined;
-
-  const options = {
+  const config = {
     url,
-    headers,
-    auth,
+    headers: {
+      'User-Agent': UserAgent,
+      'Authorization': token ? `token ${token}` : undefined,
+    },
+    auth: username && password
+      ? {
+          username,
+          password,
+        }
+      : undefined,
   };
 
   const destPath = path.isAbsolute(dPath) ? dPath : path.resolve(process.cwd(), dPath);
 
   logger(' request repo tree options.');
-  logger(JSON.stringify(options, null, JSON_STRINGIFY_PADDING));
+  logger(JSON.stringify(config, null, JSON_STRINGIFY_PADDING));
 
   try {
     logger(' loading remote repo tree...');
     beforeLoadTree && beforeLoadTree();
-    const body = await requestGetPromise(options, dgitOptions || {}, {
+    const body = await requestGetPromise(config, dgitOptions || {}, {
       onRetry() {
         logger(` request ${url} failed. Retrying...`);
         onRetry && onRetry();
@@ -122,7 +117,7 @@ async function dgit(repoOption: RepoOptionType, dPath: string, dgitOptions?: Dgi
 
     logger(' loading remote repo tree succeed.');
     afterLoadTree && afterLoadTree();
-    const result = JSON.parse(body);
+    const result = body;
 
     if (!result.tree || result.tree.length <= 0) {
       throw new Error('404 repo not found!');

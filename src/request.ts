@@ -1,16 +1,15 @@
+import type { AxiosRequestConfig } from 'axios';
 import type fs from 'node:fs';
-import type { CoreOptions, UrlOptions } from 'request';
 import type { DgitGlobalOption, DgitLifeCycle } from './type';
-import request from 'request';
+import axios from 'axios';
 import { AddExtraRandomQs } from './cmd/utils';
 import { createLogger } from './log';
-
-type RequestOption = UrlOptions & CoreOptions;
+import {any} from 'async';
 
 const REQUEST_RETRY_DELAY = 1500;
 const DEFAULT_MAX_RETRY_COUNT = 5;
 
-function requestGet(options: RequestOption, maxRetryCount: number, hooks?: DgitLifeCycle): void {
+const requestGet = async (config: AxiosRequestConfig, maxRetryCount: number, hooks?: DgitLifeCycle): Promise<void> => {
   const {
     onSuccess,
     onError,
@@ -18,26 +17,25 @@ function requestGet(options: RequestOption, maxRetryCount: number, hooks?: DgitL
     onRetry,
   } = hooks || {};
 
-  request.get(options, (err, _, body) => {
-    if (err) {
-      if (maxRetryCount < 1) {
-        onError && onError(err);
-        onFinish && onFinish();
-        return;
-      }
-      setTimeout(() => {
-        onRetry && onRetry();
-        requestGet(options, maxRetryCount - 1, hooks);
-      }, REQUEST_RETRY_DELAY);
+  try {
+    const response = await axios(config);
+    onSuccess && onSuccess(response.data);
+    onFinish && onFinish();
+  }
+  catch (err: any) {
+    if (maxRetryCount < 1) {
+      onError && onError(err);
+      onFinish && onFinish();
       return;
     }
-
-    onSuccess && onSuccess(body);
-    onFinish && onFinish();
-  });
+    setTimeout(() => {
+      onRetry && onRetry();
+      requestGet(config, maxRetryCount - 1, hooks);
+    }, REQUEST_RETRY_DELAY);
+  }
 }
 
-export function requestGetPromise(options: RequestOption, dgitOptions: DgitGlobalOption, hooks?: DgitLifeCycle): Promise<any> {
+export function requestGetPromise(config: AxiosRequestConfig, dgitOptions: DgitGlobalOption, hooks?: DgitLifeCycle): Promise<any> {
   return new Promise((resolve, reject) => {
     const { maxRetryCount = DEFAULT_MAX_RETRY_COUNT } = dgitOptions;
 
@@ -61,7 +59,7 @@ export function requestGetPromise(options: RequestOption, dgitOptions: DgitGloba
       onRetry,
     };
 
-    requestGet(options, maxRetryCount, newHooks);
+    requestGet(config, maxRetryCount, newHooks);
   });
 }
 
@@ -77,23 +75,32 @@ export function requestOnStream(url: string, ws: fs.WriteStream, dgitOptions: Dg
     onRetry,
   } = hooks || {};
 
-  const fn = (retryCount: number): void => {
+  const fn = async (retryCount: number): Promise<void> => {
     const downloadUrl = AddExtraRandomQs(url);
     logger(` dowloading from ${downloadUrl}...`);
 
-    request(encodeURI(downloadUrl))
-      .on('error', (err) => {
-        if (retryCount <= 0) {
-          onError && onError(err);
-          onFinish && onFinish();
-          return;
-        }
-        setTimeout(() => {
-          onRetry && onRetry();
-          fn(retryCount - 1);
-        }, REQUEST_RETRY_DELAY);
-      })
-      .pipe(ws);
+    try {
+      const response = await axios(
+        {
+          method: 'GET',
+          url: encodeURI(downloadUrl),
+          responseType: 'stream',
+        },
+      );
+      response.data.pipe(ws);
+    }
+    catch (err: any) {
+      if (retryCount <= 0) {
+        onError && onError(err);
+        onFinish && onFinish();
+        return;
+      }
+
+      setTimeout(() => {
+        onRetry && onRetry();
+        fn(retryCount - 1);
+      }, REQUEST_RETRY_DELAY);
+    }
   };
 
   ws.on('finish', () => {
