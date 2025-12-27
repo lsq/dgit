@@ -4,12 +4,11 @@ import type { DgitGlobalOption, DgitLifeCycle } from './type';
 import axios from 'axios';
 import { AddExtraRandomQs } from './cmd/utils';
 import { createLogger } from './log';
-import {any} from 'async';
 
 const REQUEST_RETRY_DELAY = 1500;
 const DEFAULT_MAX_RETRY_COUNT = 5;
 
-const requestGet = async (config: AxiosRequestConfig, maxRetryCount: number, hooks?: DgitLifeCycle): Promise<void> => {
+async function requestGet(config: AxiosRequestConfig, maxRetryCount: number, hooks?: DgitLifeCycle): Promise<void> {
   const {
     onSuccess,
     onError,
