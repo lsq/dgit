@@ -23,6 +23,7 @@ const DEFAULT_PARALLEL_LIMIT = 10;
 const MAX_PARALLEL_LIMIT = 100;
 const JSON_STRINGIFY_PADDING = 2;
 
+// https://deepwiki.com/search/python-node-treepythonjula-pyt_e06e7d62-6a9a-4d4b-9e74-0a1cf32f4946?mode=fast
 async function dgit(repoOption: RepoOptionType, dPath: string, dgitOptions?: DgitGlobalOption, hooks?: DgitLifeCycle & DgitLoadGitTree): Promise<void> {
   const {
     username,
@@ -53,7 +54,7 @@ async function dgit(repoOption: RepoOptionType, dPath: string, dgitOptions?: Dgi
 
   const logger = createLogger(dgitOptions);
 
-  const { exclude = [], include = [] } = dgitOptions || {};
+  const { exclude = [], include = [], exactMatch = false } = dgitOptions || {};
 
   let { parallelLimit = DEFAULT_PARALLEL_LIMIT } = dgitOptions || {};
   if (!parallelLimit || parallelLimit <= 0) {
@@ -131,7 +132,15 @@ async function dgit(repoOption: RepoOptionType, dPath: string, dgitOptions?: Dgi
     const includeTreeNodeList = treeNodeList.filter((node) => {
       const nPath = path.resolve(__dirname, node.path);
       const rPath = path.resolve(__dirname, relativePath);
-      if (!nPath.startsWith(rPath) || node.type !== 'blob') {
+      let pathMatch: boolean;
+      if (exactMatch) {
+        // 精确匹配：路径完全相等或者路径后跟分隔符
+        pathMatch = nPath === rPath || nPath.startsWith(rPath + path.sep) || nPath.startsWith(`${rPath}/`);
+      }
+      else {
+        pathMatch = nPath.startsWith(rPath);
+      }
+      if (!pathMatch || node.type !== 'blob') {
         return false;
       }
       if (

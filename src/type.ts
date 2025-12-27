@@ -7,6 +7,7 @@ export interface DgitGlobalOption {
   logPrefix?: string;
   exclude?: GithubRelativePath[];
   include?: GithubRelativePath[];
+  exactMatch?: boolean; // 精确匹配，比如只匹配mingw-w64-python，不去匹配mingw-w64-python-*
 }
 
 export interface PrivateOption {

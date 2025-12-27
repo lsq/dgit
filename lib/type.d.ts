@@ -6,6 +6,7 @@ export interface DgitGlobalOption {
     logPrefix?: string;
     exclude?: GithubRelativePath[];
     include?: GithubRelativePath[];
+    exactMatch?: boolean;
 }
 export interface PrivateOption {
     username?: string;

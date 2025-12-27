@@ -29,6 +29,7 @@ async function DownloadAction(githubLink: string | undefined, cmd: Command & Com
     include = '',
     log = false,
     logPrefix = '[dgit-logger]',
+    exactMatch = false, // 是否精确匹配
   } = cmd;
 
   const {
@@ -92,6 +93,7 @@ async function DownloadAction(githubLink: string | undefined, cmd: Command & Com
         parallelLimit: Number(parallelLimit.trim()),
         exclude: excludeList,
         include: includeList,
+        exactMatch,
       },
       {
         beforeLoadTree() {
