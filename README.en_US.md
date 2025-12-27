@@ -81,6 +81,7 @@ import dgit from '@bratel/dgit';
         * -t --token, <token>             Git token is another configurable parameter of login mode, which is used to download private repo.
         * -e --exclude, <relativePath,...,relativePath>  Specifies the collection of files or directory paths that need to be excluded for the current download directory.
         * -i --include, <relativePath,...,relativePath>  Specifies the collection of files or directories that need to be included again in the currently excluded file path collection.
+        * --exact-match, 指定精确匹配，比如mingw-w64-python不会匹配到以此开头的mingw-w64-python-tree-sitter
         * -h, --help                      Output usage information
 
 + Local installation, configurable parameters when used as a module
