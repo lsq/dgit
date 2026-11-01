@@ -24,6 +24,7 @@ const MAX_PARALLEL_LIMIT = 100;
 const JSON_STRINGIFY_PADDING = 2;
 
 // https://deepwiki.com/search/python-node-treepythonjula-pyt_e06e7d62-6a9a-4d4b-9e74-0a1cf32f4946?mode=fast
+// https://deepwiki.com/search/download-tree_f73bbd59-f23f-4431-998d-646f8bc12c27
 async function dgit(repoOption: RepoOptionType, dPath: string, dgitOptions?: DgitGlobalOption, hooks?: DgitLifeCycle & DgitLoadGitTree): Promise<void> {
   const {
     username,
@@ -31,6 +32,7 @@ async function dgit(repoOption: RepoOptionType, dPath: string, dgitOptions?: Dgi
     token,
     githubLink,
     proxy = '',
+    treeOnly = false,
   } = repoOption;
 
   let {
@@ -171,7 +173,7 @@ async function dgit(repoOption: RepoOptionType, dPath: string, dgitOptions?: Dgi
       currentCount,
       totalSize: totalStatus.size,
       totalCount: totalStatus.count,
-    });
+    }, includeTreeNodeList);
 
     logger(' include files resolved.');
     logger(
@@ -183,6 +185,11 @@ async function dgit(repoOption: RepoOptionType, dPath: string, dgitOptions?: Dgi
         totalCount: totalStatus.count,
       }),
     );
+    if (treeOnly) {
+      onSuccess && onSuccess();
+      onFinish && onFinish();
+      return;
+    }
 
     async.eachLimit(
       includeTreeNodeList,

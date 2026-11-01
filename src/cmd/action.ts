@@ -39,6 +39,7 @@ async function DownloadAction(githubLink: string | undefined, cmd: Command & Com
   } = cmd;
   const {
     proxy = '',
+    treeOnly = false,
   } = cmd;
 
   if (githubLink && isHttpsLink(githubLink)) {
@@ -85,6 +86,7 @@ async function DownloadAction(githubLink: string | undefined, cmd: Command & Com
         password,
         token,
         proxy,
+        treeOnly,
       },
       dest,
       {
@@ -102,7 +104,11 @@ async function DownloadAction(githubLink: string | undefined, cmd: Command & Com
         afterLoadTree() {
           spinner.succeed(' load remote repo tree succeed! ');
         },
-        onResolved(status) {
+        onResolved(status, nodes) {
+          if (treeOnly) {
+            nodes?.forEach(n => console.log(n.path));
+            return;
+          }
           if (log)
             return;
           const green = '\u001B[42m \u001B[0m';
@@ -120,13 +126,16 @@ async function DownloadAction(githubLink: string | undefined, cmd: Command & Com
           bar.update(index);
         },
         onProgress(_, node) {
+          if (treeOnly) {
+            return;
+          }
           if (log)
             return;
           bar.tick({ file: TextEllipsis(node.path, MAX_TEXT_ELLIPSIS) });
         },
       },
     );
-    spinner.succeed(' download all files succeed!');
+    spinner.succeed(treeOnly ? 'Parsing download tree list succeed!' : ' download all files succeed!');
   }
   catch (error) {
     console.error(error);

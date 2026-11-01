@@ -17,6 +17,7 @@ export interface CommandInfo {
     log?: boolean;
     logPrefix?: string;
     proxy?: string;
+    treeOnly?: boolean;
     exactMatch?: boolean;
 }
 export interface DownloadPromptInfo {

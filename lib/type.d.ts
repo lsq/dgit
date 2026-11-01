@@ -20,6 +20,7 @@ export interface RepoOptionType extends PrivateOption {
     relativePath?: string;
     githubLink?: string;
     proxy?: string;
+    treeOnly?: boolean;
 }
 export interface RepoTreeNode {
     path: string;
@@ -33,7 +34,7 @@ export interface DgitLifeCycle {
     onFinish?: () => void;
     onRetry?: () => void;
     onProgress?: (status: ProgressStatus, node: RepoTreeNode) => void;
-    onResolved?: (status: ProgressStatus) => void;
+    onResolved?: (status: ProgressStatus, nodes?: RepoTreeNode[]) => void;
 }
 export interface DgitLoadGitTree {
     beforeLoadTree?: () => void;

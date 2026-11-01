@@ -15,11 +15,11 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [24.x]
+        node-version: [24.x, 26.x]
 
     steps:
       - name: Checkout Commit
-        uses: actions/checkout@v5 # v5.0.0
+        uses: actions/checkout@v6 # v5.0.0
         with:
           # Necessary to find the commits included in the release
           fetch-depth: 0
