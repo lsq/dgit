@@ -30,6 +30,7 @@ export interface RepoTreeNode {
   path: string;
   type: 'blob' | 'tree';
   size: number;
+  sha: string;
   url: string;
 }
 

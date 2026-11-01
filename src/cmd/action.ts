@@ -110,7 +110,7 @@ async function DownloadAction(githubLink: string | undefined, cmd: Command & Com
     try {
       const nodes = await getRepoTree(repoOption, dgitOptions, treeHooks);
       nodes.forEach((node) => {
-        console.log(`${node.path} ${node.size}B`);
+        console.log(`${node.path} ${node.size}B ${node.sha} ${node.url}`);
       });
       spinner.succeed(' list download tree succeed!');
     }
