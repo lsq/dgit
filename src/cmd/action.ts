@@ -3,7 +3,7 @@ import type { Ora } from 'ora';
 import type { CommandInfo } from './type';
 import ora from 'ora';
 import ProgressBar from 'progress';
-import dgit from '../dgit';
+import dgit, { getRepoTree } from '../dgit';
 
 import { DownloadPrompt, PasswordPrompt } from './prompt';
 import {
@@ -75,40 +75,60 @@ async function DownloadAction(githubLink: string | undefined, cmd: Command & Com
   const spinner: Ora = ora(' loading remote repo tree...');
   let bar: ProgressBar;
 
+  const repoOption
+    = {
+      ref,
+      owner,
+      repoName,
+      relativePath,
+      username,
+      password,
+      token,
+      proxy,
+      treeOnly,
+    };
+  const dgitOptions
+    = {
+      log,
+      logPrefix,
+      parallelLimit: Number(parallelLimit.trim()),
+      exclude: excludeList,
+      include: includeList,
+      exactMatch,
+    };
+  const treeHooks
+    = {
+      beforeLoadTree() {
+        spinner.start();
+      },
+      afterLoadTree() {
+        spinner.succeed(' load remote repo tree succeed! ');
+      },
+    };
+  // tree 模式：只输出文件列表，不下载
+  if (treeOnly) {
+    try {
+      const nodes = await getRepoTree(repoOption, dgitOptions, treeHooks);
+      nodes.forEach((node) => {
+        console.log(`${node.path} ${node.size}B`);
+      });
+      spinner.succeed(' list download tree succeed!');
+    }
+    catch (error) {
+      console.error(error);
+      spinner.fail(' list download tree failed!');
+    }
+    return;
+  }
+
   try {
     await dgit(
-      {
-        ref,
-        owner,
-        repoName,
-        relativePath,
-        username,
-        password,
-        token,
-        proxy,
-        treeOnly,
-      },
+      repoOption,
       dest,
+      dgitOptions,
       {
-        log,
-        logPrefix,
-        parallelLimit: Number(parallelLimit.trim()),
-        exclude: excludeList,
-        include: includeList,
-        exactMatch,
-      },
-      {
-        beforeLoadTree() {
-          spinner.start();
-        },
-        afterLoadTree() {
-          spinner.succeed(' load remote repo tree succeed! ');
-        },
-        onResolved(status, nodes) {
-          if (treeOnly) {
-            nodes?.forEach(n => console.log(n.path));
-            return;
-          }
+        ...treeHooks,
+        onResolved(status) {
           if (log)
             return;
           const green = '\u001B[42m \u001B[0m';

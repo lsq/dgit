@@ -2,6 +2,7 @@ import type {
   DgitGlobalOption,
   DgitLifeCycle,
   DgitLoadGitTree,
+  GithubRelativePath,
   RepoOptionType,
   RepoTreeNode,
 } from './type';
@@ -9,37 +10,49 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import async from 'async';
-import {
-  isHttpsLink,
-  MakeDirs,
-  ParseGithubHttpsLink,
-} from './cmd/utils';
+import { isHttpsLink, MakeDirs, ParseGithubHttpsLink } from './cmd/utils';
 import { createLogger } from './log';
 import repo from './repo';
 import { requestGetPromise, requestOnStream } from './request';
 
-const UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36';
+const UserAgent
+  = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36';
 const DEFAULT_PARALLEL_LIMIT = 10;
 const MAX_PARALLEL_LIMIT = 100;
 const JSON_STRINGIFY_PADDING = 2;
 
-// https://deepwiki.com/search/python-node-treepythonjula-pyt_e06e7d62-6a9a-4d4b-9e74-0a1cf32f4946?mode=fast
-// https://deepwiki.com/search/download-tree_f73bbd59-f23f-4431-998d-646f8bc12c27
-async function dgit(repoOption: RepoOptionType, dPath: string, dgitOptions?: DgitGlobalOption, hooks?: DgitLifeCycle & DgitLoadGitTree): Promise<void> {
-  const {
-    username,
-    password,
-    token,
-    githubLink,
-    proxy = '',
-    treeOnly = false,
-  } = repoOption;
+// ---- 对外暴露的类型（lib/dgit.d.ts 为包入口，外部才能拿到类型） ----
+export {
+  DgitGlobalOption,
+  DgitLifeCycle,
+  DgitLoadGitTree,
+  GithubRelativePath,
+  ProgressStatus,
+  RepoOptionType,
+  RepoTreeNode,
+} from './type';
+
+interface ResolvedRepoOption {
+  owner: string;
+  repoName: string;
+  ref: string;
+  relativePath: string;
+  username?: string;
+  password?: string;
+  token?: string;
+  proxy?: string;
+}
+
+// githubLink 解析 + 参数校验，dgit / getRepoTree 共用
+function resolveRepoOption(repoOption: RepoOptionType): ResolvedRepoOption {
+  const { username, password, token, githubLink } = repoOption;
 
   let {
-    owner,
-    repoName,
+    owner = '',
+    repoName = '',
     ref = 'master',
     relativePath = '.',
+    proxy = '',
   } = repoOption;
 
   if (githubLink && isHttpsLink(githubLink)) {
@@ -54,9 +67,119 @@ async function dgit(repoOption: RepoOptionType, dPath: string, dgitOptions?: Dgi
     throw new Error('invalid repo option.');
   }
 
-  const logger = createLogger(dgitOptions);
+  return {
+    owner,
+    repoName,
+    ref,
+    relativePath,
+    username,
+    password,
+    token,
+    proxy,
+  };
+}
 
-  const { exclude = [], include = [], exactMatch = false } = dgitOptions || {};
+// 过滤出待下载文件列表：relativePath 前缀 + blob + exclude/include
+function filterTreeNodes(treeNodeList: RepoTreeNode[], relativePath: string, exclude: GithubRelativePath[], include: GithubRelativePath[]): RepoTreeNode[] {
+  return treeNodeList.filter((node) => {
+    const nPath = path.resolve(__dirname, node.path);
+    const rPath = path.resolve(__dirname, relativePath);
+    if (!nPath.startsWith(rPath) || node.type !== 'blob') {
+      return false;
+    }
+    if (
+      exclude.some(v => nPath.startsWith(path.resolve(rPath, v)))
+      && include.every(v => !nPath.startsWith(path.resolve(rPath, v)))
+    ) {
+      return false;
+    }
+    return true;
+  });
+}
+
+// ========== 对外接口：获取 download tree 列表，不下载 ==========
+export async function getRepoTree(repoOption: RepoOptionType, dgitOptions?: DgitGlobalOption, hooks?: DgitLoadGitTree & Pick<DgitLifeCycle, 'onRetry'>): Promise<RepoTreeNode[]> {
+  const { owner, repoName, ref, relativePath, username, password, token }
+    = resolveRepoOption(repoOption);
+
+  const logger = createLogger(dgitOptions);
+  const { exclude = [], include = [] } = dgitOptions || {};
+  const { beforeLoadTree, afterLoadTree, onRetry } = hooks || {};
+
+  const { getRepoTreeUrl } = repo(owner, repoName, ref);
+  const url = getRepoTreeUrl();
+
+  const headers = {
+    'User-Agent': UserAgent,
+    'Authorization': token ? `token ${token}` : undefined,
+  };
+
+  const auth
+    = username && password
+      ? {
+          username,
+          password,
+          sendImmediately: true,
+        }
+      : undefined;
+
+  const options = {
+    url,
+    headers,
+    auth,
+  };
+
+  logger(' request repo tree options.');
+  logger(JSON.stringify(options, null, JSON_STRINGIFY_PADDING));
+
+  logger(' loading remote repo tree...');
+  beforeLoadTree && beforeLoadTree();
+  const body = await requestGetPromise(options, dgitOptions || {}, {
+    onRetry() {
+      logger(` request ${url} failed. Retrying...`);
+      onRetry && onRetry();
+    },
+  });
+  logger(' loading remote repo tree succeed.');
+  afterLoadTree && afterLoadTree();
+
+  const result = JSON.parse(body);
+  if (!result.tree || result.tree.length <= 0) {
+    throw new Error('404 repo not found!');
+  }
+
+  const treeNodeList: RepoTreeNode[] = result.tree;
+  const includeTreeNodeList = filterTreeNodes(
+    treeNodeList,
+    relativePath,
+    exclude,
+    include,
+  );
+
+  if (includeTreeNodeList.length <= 0) {
+    throw new Error(`404 repo ${relativePath} not found!`);
+  }
+
+  return includeTreeNodeList;
+}
+
+// https://deepwiki.com/search/python-node-treepythonjula-pyt_e06e7d62-6a9a-4d4b-9e74-0a1cf32f4946?mode=fast
+// https://deepwiki.com/search/download-tree_f73bbd59-f23f-4431-998d-646f8bc12c27
+async function dgit(
+  repoOption: RepoOptionType,
+  dPath: string,
+  dgitOptions?: DgitGlobalOption,
+  hooks?: DgitLifeCycle & DgitLoadGitTree,
+): Promise<void> {
+  const {
+    owner,
+    repoName,
+    relativePath,
+    ref,
+    proxy,
+  } = resolveRepoOption(repoOption);
+
+  const logger = createLogger(dgitOptions);
 
   let { parallelLimit = DEFAULT_PARALLEL_LIMIT } = dgitOptions || {};
   if (!parallelLimit || parallelLimit <= 0) {
@@ -85,73 +208,18 @@ async function dgit(repoOption: RepoOptionType, dPath: string, dgitOptions?: Dgi
     onErrorReject = reject;
   });
 
-  const { getRepoTreeUrl, getDownloadUrl } = repo(owner, repoName, ref, proxy);
-  const url = getRepoTreeUrl();
+  const { getDownloadUrl } = repo(owner, repoName, ref, proxy);
 
-  const config = {
-    url,
-    headers: {
-      'User-Agent': UserAgent,
-      'Authorization': token ? `token ${token}` : undefined,
-    },
-    auth: username && password
-      ? {
-          username,
-          password,
-        }
-      : undefined,
-  };
-
-  const destPath = path.isAbsolute(dPath) ? dPath : path.resolve(process.cwd(), dPath);
-
-  logger(' request repo tree options.');
-  logger(JSON.stringify(config, null, JSON_STRINGIFY_PADDING));
+  const destPath = path.isAbsolute(dPath)
+    ? dPath
+    : path.resolve(process.cwd(), dPath);
 
   try {
-    logger(' loading remote repo tree...');
-    beforeLoadTree && beforeLoadTree();
-    const body = await requestGetPromise(config, dgitOptions || {}, {
-      onRetry() {
-        logger(` request ${url} failed. Retrying...`);
-        onRetry && onRetry();
-      },
+    const includeTreeNodeList = await getRepoTree(repoOption, dgitOptions, {
+      beforeLoadTree,
+      afterLoadTree,
+      onRetry,
     });
-
-    logger(' loading remote repo tree succeed.');
-    afterLoadTree && afterLoadTree();
-    const result = body;
-
-    if (!result.tree || result.tree.length <= 0) {
-      throw new Error('404 repo not found!');
-    }
-
-    const treeNodeList: RepoTreeNode[] = result.tree;
-    const includeTreeNodeList = treeNodeList.filter((node) => {
-      const nPath = path.resolve(__dirname, node.path);
-      const rPath = path.resolve(__dirname, relativePath);
-      let pathMatch: boolean;
-      if (exactMatch) {
-        // 精确匹配：路径完全相等或者路径后跟分隔符
-        pathMatch = nPath === rPath || nPath.startsWith(rPath + path.sep) || nPath.startsWith(`${rPath}/`);
-      }
-      else {
-        pathMatch = nPath.startsWith(rPath);
-      }
-      if (!pathMatch || node.type !== 'blob') {
-        return false;
-      }
-      if (
-        exclude.some(v => nPath.startsWith(path.resolve(rPath, v)))
-        && include.every(v => !nPath.startsWith(path.resolve(rPath, v)))
-      ) {
-        return false;
-      }
-      return true;
-    });
-
-    if (includeTreeNodeList.length <= 0) {
-      throw new Error(`404 repo ${relativePath} not found!`);
-    }
 
     const totalStatus = includeTreeNodeList.reduce(
       (prev, cur) => {
@@ -168,12 +236,15 @@ async function dgit(repoOption: RepoOptionType, dPath: string, dgitOptions?: Dgi
     let currentCount = 0;
 
     onResolved
-    && onResolved({
-      currentSize,
-      currentCount,
-      totalSize: totalStatus.size,
-      totalCount: totalStatus.count,
-    }, includeTreeNodeList);
+    && onResolved(
+      {
+        currentSize,
+        currentCount,
+        totalSize: totalStatus.size,
+        totalCount: totalStatus.count,
+      },
+      includeTreeNodeList,
+    );
 
     logger(' include files resolved.');
     logger(
@@ -185,12 +256,6 @@ async function dgit(repoOption: RepoOptionType, dPath: string, dgitOptions?: Dgi
         totalCount: totalStatus.count,
       }),
     );
-    if (treeOnly) {
-      onSuccess && onSuccess();
-      onFinish && onFinish();
-      return;
-    }
-
     async.eachLimit(
       includeTreeNodeList,
       parallelLimit,

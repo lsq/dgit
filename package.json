@@ -1,7 +1,7 @@
 {
   "name": "@bratel/dgit",
-  "version": "0.0.16",
-  "description": "@dking/hasaki-cli init application",
+  "version": "1.0.0",
+  "description": "@bratel git download application",
   "publishConfig": {
     "access": "public"
   },
@@ -24,7 +24,7 @@
     "prepare": "husky init",
     "build:ts": "tsc --build",
     "lint": "eslint",
-    "lint:fix": "eslint src --ext .jsx --ext .js --ext .tsx --ext .ts --cache --fix",
+    "lint:fix": "eslint src test --ext .jsx --ext .js --ext .tsx --ext .ts --cache --fix",
     "test:mocha": "npm run build:ts && nyc --reporter=text mocha --require ts-node/register test/**/*.{ts,tsx} -t 60000",
     "test:mocha:reporter": "nyc --reporter=lcov --reporter=text mocha --require ts-node/register test/**/*.{ts,tsx} -t 60000 --reporter=mochawesome",
     "watch:ts": "tsc --watch",
