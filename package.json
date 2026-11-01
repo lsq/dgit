@@ -39,7 +39,8 @@
     "commander": "^15.0.0",
     "inquirer": "^14.2.5",
     "ora": "^10.0.0",
-    "progress": "^2.0.3"
+    "progress": "^2.0.3",
+    "tslib": "^2.9.1"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^10.0.0",

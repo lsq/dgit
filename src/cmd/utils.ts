@@ -65,7 +65,11 @@ export function ParseGithubHttpsLink(httpsLink: string): GithubLinkInfo {
   };
 }
 
-export const TextEllipsis = (text: string, maxLen: number): string => (text.length >= maxLen ? `${text.slice(0, maxLen)}...` : text);
+export function TextEllipsis(text: string, maxLen: number): string {
+  return text.length >= maxLen
+    ? `${text.slice(0, maxLen)}...`
+    : text;
+}
 
 export function MakeDirs(dirs: string): void {
   const mkdirs = (dir: string, callback?: () => void) => {

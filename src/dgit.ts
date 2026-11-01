@@ -111,7 +111,9 @@ export async function getRepoTree(repoOption: RepoOptionType, dgitOptions?: Dgit
 
   const headers = {
     'User-Agent': UserAgent,
-    'Authorization': token ? `token ${token}` : undefined,
+    'Authorization': token
+      ? `token ${token}`
+      : undefined,
   };
 
   const auth
@@ -140,13 +142,20 @@ export async function getRepoTree(repoOption: RepoOptionType, dgitOptions?: Dgit
       onRetry && onRetry();
     },
   });
-  logger(' loading remote repo tree succeed.');
-  afterLoadTree && afterLoadTree();
 
-  const result = JSON.parse(body);
+  const result = typeof body === 'string'
+    ? JSON.parse(body)
+    : body;
+  if (result.message) {
+    // GitHub API 错误响应，透出真实原因
+    throw new Error(`github api error: ${result.message}`);
+  }
+  // console.log('tree api response:', JSON.stringify(result));
   if (!result.tree || result.tree.length <= 0) {
     throw new Error('404 repo not found!');
   }
+  logger(' loading remote repo tree succeed.');
+  afterLoadTree && afterLoadTree();
 
   const treeNodeList: RepoTreeNode[] = result.tree;
   const includeTreeNodeList = filterTreeNodes(

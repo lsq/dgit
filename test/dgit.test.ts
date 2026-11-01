@@ -9,6 +9,7 @@ import {
 } from 'mocha';
 import dgit from '../src/dgit';
 
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || '';
 function Clean(targets: Array<string>, callback: () => void) {
   targets.forEach((deletePath) => {
     const stat = fs.statSync(deletePath);
@@ -52,6 +53,7 @@ describe('dgit功能测试', () => {
         owner: 'JohnApache',
         repoName: 'hasaki-cli',
         ref: 'master',
+        token: GITHUB_TOKEN || undefined,
         relativePath: './PLAN.txt',
       },
       './testDir',
@@ -66,7 +68,7 @@ describe('dgit功能测试', () => {
 
   it('dgit 能直接使用githubLink方式拉取远端git指定目录代码', async () => {
     await dgit(
-      { githubLink: 'https://github.com/JohnApache/hasaki-cli/blob/master/PLAN.txt' },
+      { githubLink: 'https://github.com/JohnApache/hasaki-cli/blob/master/PLAN.txt', token: GITHUB_TOKEN || undefined },
       './testDir',
       {
         log: true,
@@ -82,7 +84,7 @@ describe('dgit功能测试', () => {
 
   it('dgit 能直接使用githubLink方式拉取远端git指定深层指定文件代码', async () => {
     await dgit(
-      { githubLink: 'https://github.com/JohnApache/hasaki-cli/blob/master/assets/.eslintignore' },
+      { githubLink: 'https://github.com/JohnApache/hasaki-cli/blob/master/assets/.eslintignore', token: GITHUB_TOKEN || undefined },
       './testDir',
       {
         log: true,
@@ -98,7 +100,7 @@ describe('dgit功能测试', () => {
 
   it('dgit 能直接使用githubLink方式拉取远端git指定深层指定目录代码', async () => {
     await dgit(
-      { githubLink: 'https://github.com/JohnApache/hasaki-cli/tree/master/assets/webpack' },
+      { githubLink: 'https://github.com/JohnApache/hasaki-cli/tree/master/assets/webpack', token: GITHUB_TOKEN || undefined },
       './testDir',
       {
         log: true,
@@ -115,7 +117,7 @@ describe('dgit功能测试', () => {
 
   it('dgit 能接受exclude include 参数筛选目标目录文件', async () => {
     await dgit(
-      { githubLink: 'https://github.com/JohnApache/dgit/tree/master/src' },
+      { githubLink: 'https://github.com/JohnApache/dgit/tree/master/src', token: GITHUB_TOKEN || undefined },
       './testDir',
       {
         log: true,

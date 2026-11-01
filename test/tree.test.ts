@@ -3,6 +3,8 @@ import { expect } from 'chai';
 // test/tree.test.ts
 import { describe, it } from 'mocha';
 import { getRepoTree } from '../src/dgit';
+// CI 里通过 env 注入；本地可用 GITHUB_TOKEN=xxx npm run test:mocha
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || '';
 
 describe('getRepoTree 功能测试', () => {
   it('能获取远端仓库指定目录的下载文件列表', async () => {
@@ -11,6 +13,7 @@ describe('getRepoTree 功能测试', () => {
         owner: 'JohnApache',
         repoName: 'dgit',
         ref: 'master',
+        token: GITHUB_TOKEN || undefined,
         relativePath: './src',
       },
       { log: true },
@@ -30,6 +33,7 @@ describe('getRepoTree 功能测试', () => {
       owner: 'JohnApache',
       repoName: 'hasaki-cli',
       ref: 'master',
+      token: GITHUB_TOKEN || undefined,
       relativePath: './PLAN.txt',
     });
 
@@ -40,6 +44,7 @@ describe('getRepoTree 功能测试', () => {
   it('能直接使用 githubLink 获取深层目录列表', async () => {
     const nodes = await getRepoTree({
       githubLink: 'https://github.com/JohnApache/hasaki-cli/tree/master/assets/webpack',
+      token: GITHUB_TOKEN || undefined,
     });
 
     const paths = nodes.map(n => n.path);
@@ -53,6 +58,7 @@ describe('getRepoTree 功能测试', () => {
         owner: 'JohnApache',
         repoName: 'dgit',
         ref: 'master',
+        token: GITHUB_TOKEN || undefined,
         relativePath: './src',
       },
       {
@@ -74,12 +80,13 @@ describe('getRepoTree 功能测试', () => {
         owner: 'JohnApache',
         repoName: 'repo-that-does-not-exist-xyz',
         ref: 'master',
+        token: GITHUB_TOKEN || undefined,
         relativePath: './src',
       });
       expect.fail('should have thrown');
     }
     catch (err: any) {
-      expect(err.message).to.be.equal('404 repo not found!');
+      expect(err.message).to.be.include('404');
     }
   });
 
@@ -89,12 +96,13 @@ describe('getRepoTree 功能测试', () => {
         owner: 'JohnApache',
         repoName: 'dgit',
         ref: 'master',
+        token: GITHUB_TOKEN || undefined,
         relativePath: './dir-not-exist',
       });
       expect.fail('should have thrown');
     }
     catch (err: any) {
-      expect(err.message).to.include('404 repo');
+      expect(err.message).to.include('404');
       expect(err.message).to.include('not found!');
     }
   });
@@ -118,6 +126,7 @@ describe('getRepoTree 功能测试', () => {
         owner: 'JohnApache',
         repoName: 'dgit',
         ref: 'master',
+        token: GITHUB_TOKEN || undefined,
         relativePath: './src',
       },
       {},

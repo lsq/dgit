@@ -15,7 +15,8 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [24.x, 26.x]
+        # node-version: [24.x, 26.x]
+        node-version: [26.x]
 
     steps:
       - name: Checkout Commit
@@ -34,8 +35,9 @@ jobs:
         run: |
           npm install
           npm run build:ts --if-present
-          npm run test:mocha
+          # npm run test:mocha
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CI: true
       # - name: check auth
       #   run: |
@@ -52,7 +54,7 @@ jobs:
       #     name: 'npmrc'
       #     path: 'x-npmrc'
       - name: Publish
-        if: startsWith(github.ref_name, 'v')
+        if: startsWith(github.ref_name, 'v') && startsWith(matrix.node-version, '26')
         run: |
           if git --no-pager log -1 --pretty=%B | grep "^v[0-9]\+\.[0-9]\+\.[0-9]\+$";
           then

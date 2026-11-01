@@ -151,7 +151,9 @@ async function DownloadAction(githubLink: string | undefined, cmd: Command & Com
           }
           if (log)
             return;
-          bar.tick({ file: TextEllipsis(node.path, MAX_TEXT_ELLIPSIS) });
+          bar.tick({
+            file: TextEllipsis(node.path, MAX_TEXT_ELLIPSIS),
+          });
         },
       },
     );

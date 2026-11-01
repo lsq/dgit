@@ -18,6 +18,11 @@ async function requestGet(config: AxiosRequestConfig, maxRetryCount: number, hoo
 
   try {
     const response = await axios(config);
+    if (response.status >= 400) {
+      onError && onError(new Error(`request ${config.url} failed: ${response.status}`));
+      onFinish && onFinish();
+      return;
+    }
     onSuccess && onSuccess(response.data);
     onFinish && onFinish();
   }
