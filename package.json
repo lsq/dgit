@@ -1,6 +1,6 @@
 {
   "name": "@bratel/dgit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "@bratel git download application",
   "publishConfig": {
     "access": "public"
